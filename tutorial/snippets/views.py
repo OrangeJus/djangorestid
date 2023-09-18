@@ -1,11 +1,9 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import mixins
-from django.http import Http404
 from snippets.models import Snippet
+from django.contrib.auth.models import User
 from snippets.serializers import SnippetSerializer
+from snippets.serializers import UserSerializer
 
 # Create your views here.
 
@@ -23,12 +21,6 @@ class SnippetList(mixins.ListModelMixin,
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-#Using generic class-based views
-
-# class SnippetList(generics.ListCreateAPIView):
-#     queryset = Snippet.objects.all()
-#     serializer_class = SnippetSerializer
-
 class SnippetDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
@@ -44,9 +36,11 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+    
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
-#Using generic class-based views
-
-# class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Snippet.objects.all()
-#     serializer_class = SnippetSerializer
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
