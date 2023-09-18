@@ -1,5 +1,5 @@
-from rest_framework import generics
-from rest_framework import mixins
+from rest_framework import generics, mixins, permissions
+from snippets.permissions import IsOwnerOrReadOnly
 from snippets.models import Snippet
 from django.contrib.auth.models import User
 from snippets.serializers import SnippetSerializer
@@ -12,6 +12,8 @@ class SnippetList(mixins.ListModelMixin,
                   generics.GenericAPIView
                 ):
     
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
     
@@ -20,11 +22,17 @@ class SnippetList(mixins.ListModelMixin,
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 class SnippetDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
                     generics.GenericAPIView):
+    
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
     
